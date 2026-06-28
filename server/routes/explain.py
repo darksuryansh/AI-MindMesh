@@ -22,14 +22,11 @@ def explain(
     cache_key = (topic, level.value)
     if cache_key not in _cache:
         system_instruction, user_prompt = build_explain_prompt(level, topic)
-        try:
-            text = gemini_service.generate_text(
-                user_prompt,
-                system_instruction=system_instruction,
-                temperature=0.7,
-            )
-        except Exception as exc:  # noqa: BLE001 - surface a clean error to the client
-            raise HTTPException(status_code=502, detail=f"Explanation failed: {exc}")
+        text = gemini_service.generate_text(
+            user_prompt,
+            system_instruction=system_instruction,
+            temperature=0.7,
+        )
         if not text.strip():
             raise HTTPException(status_code=502, detail="Empty explanation returned.")
         _cache[cache_key] = text
