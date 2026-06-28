@@ -1,26 +1,118 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: `dark:` responds to a `.dark` class on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Design tokens: "Signal & Structure" ─────────────────────────────
+   Iris/indigo = the network's structure. Warm signal = the learning spark. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f7fb;   /* cool porcelain paper */
+  --surface: #ffffff;
+  --surface-2: #eef0f7;
+  --foreground: #14171e;   /* ink */
+  --muted: #586173;
+  --border: #e5e8f1;
+  --primary: #574fe6;      /* iris */
+  --primary-foreground: #ffffff;
+  --signal: #f0683a;       /* warm signal */
+  --success: #15924c;
+  --danger: #d33a38;
+  --ring: #574fe6;
+}
+
+.dark {
+  --background: #0b0f1a;   /* deep ink-navy (not pure black) */
+  --surface: #121827;
+  --surface-2: #1a2336;
+  --foreground: #e8ebf3;
+  --muted: #98a2b8;
+  --border: #243049;
+  --primary: #8b85ff;      /* lifted iris for dark surfaces */
+  --primary-foreground: #0b0f1a;
+  --signal: #ff8052;
+  --success: #34d399;
+  --danger: #f87171;
+  --ring: #8b85ff;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-signal: var(--signal);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-ring: var(--ring);
+
+  --font-display: var(--font-bricolage);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans), system-ui, sans-serif;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  /* Quiet, theme-aware scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--muted) 40%, transparent) transparent;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Signature mesh animation (reduced-motion aware) ────────────────── */
+@keyframes signal-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+@keyframes node-pulse {
+  0%, 100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.mesh-edge {
+  stroke-dasharray: 4 8;
+  animation: signal-flow 1.1s linear infinite;
+}
+.mesh-node {
+  animation: node-pulse 2.4s ease-in-out infinite;
+}
+
+/* KaTeX: let long display equations scroll instead of overflowing on mobile. */
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

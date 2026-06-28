@@ -1,65 +1,108 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+
+import { Brand } from "@/components/Brand";
+import { Chat } from "@/components/Chat";
+import { ChatProvider } from "@/components/chat/ChatContext";
+import { ExplainMode } from "@/components/ExplainMode";
+import { Hero } from "@/components/Hero";
+import { Quiz } from "@/components/Quiz";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { TopicSelect } from "@/components/TopicSelect";
+import { Segmented } from "@/components/ui/Segmented";
+import { cn } from "@/lib/cn";
+import { DEFAULT_TOPIC } from "@/lib/topics";
+
+type Tab = "explain" | "quiz" | "chat";
+
+const TABS = [
+  { value: "explain" as const, label: "Explain" },
+  { value: "quiz" as const, label: "Quiz" },
+  { value: "chat" as const, label: "Chat" },
+];
 
 export default function Home() {
+  const [tab, setTab] = useState<Tab>("explain");
+  const [topic, setTopic] = useState<string>(DEFAULT_TOPIC);
+
+  // The topic dropdown lives in the navbar on the Explain (home) view; Quiz and
+  // Chat open in full view without it. Changing the topic stays on Explain.
+  const showTopic = tab === "explain";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <ChatProvider topic={topic}>
+      <div className="flex h-dvh flex-col overflow-hidden">
+        {/* Navbar: brand (left), topic dropdown (centered), theme toggle (right). */}
+        <header className="shrink-0 border-b bg-background/90 backdrop-blur">
+          <div className="mx-auto max-w-5xl px-4 py-3 sm:px-6">
+            <div className="grid grid-cols-2 items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
+              <div className="flex justify-start sm:col-start-1">
+                <Brand />
+              </div>
+              {showTopic && (
+                <div className="order-last col-span-2 sm:order-0 sm:col-span-1 sm:col-start-2 sm:flex sm:justify-center">
+                  <TopicSelect value={topic} onChange={setTopic} />
+                </div>
+              )}
+              <div className="flex justify-end sm:col-start-3">
+                <ThemeToggle />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="flex min-h-0 flex-1 flex-col">
+          {/* Mode switcher — its own bar, not part of the navbar. */}
+          <div className="shrink-0 border-b">
+            <div className="mx-auto max-w-5xl px-4 py-3 sm:px-6">
+              <Segmented
+                ariaLabel="Choose a learning mode"
+                options={TABS}
+                value={tab}
+                onChange={setTab}
+                className="w-full sm:w-auto"
+              />
+            </div>
+          </div>
+
+          {/* Active panel fills the rest; only this region scrolls. */}
+          <div className="min-h-0 flex-1">
+            {/* Explain: the empty state fits one screen; once an explanation is
+                generated the whole page scrolls naturally. */}
+            <div
+              className={cn(
+                "h-full overflow-y-auto",
+                tab !== "explain" && "hidden",
+              )}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              <div className="mx-auto max-w-5xl space-y-6 px-4 py-6 sm:px-6">
+                <Hero topic={topic} />
+                <ExplainMode topic={topic} />
+              </div>
+            </div>
+
+            {/* Quiz: full view. */}
+            <div
+              className={cn(
+                "h-full overflow-y-auto",
+                tab !== "quiz" && "hidden",
+              )}
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+              <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+                <Quiz topic={topic} />
+              </div>
+            </div>
+
+            {/* Chat: full view, fills the height. */}
+            <div className={cn("h-full", tab !== "chat" && "hidden")}>
+              <div className="mx-auto h-full max-w-5xl px-4 py-6 sm:px-6">
+                <Chat topic={topic} />
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </ChatProvider>
   );
 }
