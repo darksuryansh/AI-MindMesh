@@ -6,14 +6,29 @@ import { useChat } from "@/components/chat/ChatContext";
 import { Markdown } from "@/components/Markdown";
 import { cn } from "@/lib/cn";
 
+function TypingDots() {
+  return (
+    <div className="flex items-center gap-1.5 py-1">
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="mesh-node h-2 w-2 rounded-full bg-muted"
+          style={{ animationDelay: `${i * 0.18}s` }}
+        />
+      ))}
+    </div>
+  );
+}
+
 /** Renders the shared conversation. Used both in the Chat tab and inline in Explain. */
 export function ChatThread({ className }: { className?: string }) {
-  const { messages, sending } = useChat();
+  const { messages } = useChat();
   const endRef = useRef<HTMLDivElement>(null);
 
+  // Keep pinned to the newest content as tokens stream in.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, sending]);
+    endRef.current?.scrollIntoView({ block: "end" });
+  }, [messages]);
 
   return (
     <div className={cn("space-y-4 overflow-y-auto", className)}>
@@ -35,26 +50,14 @@ export function ChatThread({ className }: { className?: string }) {
           >
             {m.role === "user" ? (
               <p className="whitespace-pre-wrap">{m.content}</p>
-            ) : (
+            ) : m.content ? (
               <Markdown content={m.content} className="text-sm" />
+            ) : (
+              <TypingDots />
             )}
           </div>
         </div>
       ))}
-
-      {sending && (
-        <div className="flex justify-start">
-          <div className="flex items-center gap-1.5 rounded-2xl bg-surface-2 px-4 py-3">
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                className="mesh-node h-2 w-2 rounded-full bg-muted"
-                style={{ animationDelay: `${i * 0.18}s` }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
       <div ref={endRef} />
     </div>

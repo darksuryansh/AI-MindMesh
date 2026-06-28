@@ -81,6 +81,38 @@ def generate_chat_reply(
     return response.text or ""
 
 
+def stream_chat_reply(
+    history: list[dict],
+    *,
+    system_instruction: str | None = None,
+    temperature: float | None = None,
+    model: str | None = None,
+):
+    """Yield reply text chunks as they arrive (token-by-token streaming).
+
+    Same inputs as `generate_chat_reply`, but a generator instead of a string.
+    """
+    contents = [
+        types.Content(
+            role=_ROLE_MAP.get(message["role"], "user"),
+            parts=[types.Part(text=message["content"])],
+        )
+        for message in history
+    ]
+    config = types.GenerateContentConfig(
+        system_instruction=system_instruction,
+        temperature=temperature,
+    )
+    stream = get_client().models.generate_content_stream(
+        model=model or settings.gemini_model,
+        contents=contents,
+        config=config,
+    )
+    for chunk in stream:
+        if chunk.text:
+            yield chunk.text
+
+
 def generate_structured(
     prompt: str,
     *,

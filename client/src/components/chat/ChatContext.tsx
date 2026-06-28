@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { ApiError, resetChat, sendChatMessage } from "@/lib/api";
+import { ApiError, resetChat, streamChatMessage } from "@/lib/api";
 import type { ChatMessage } from "@/lib/types";
 
 interface ChatState {
@@ -56,17 +56,34 @@ export function ChatProvider({
 
       setError(null);
       const shown = (displayAs ?? message).trim() || sent;
-      setMessages((m) => [...m, { role: "user", content: shown }]);
+      // Add the user turn plus an empty assistant turn to stream tokens into.
+      setMessages((m) => [
+        ...m,
+        { role: "user", content: shown },
+        { role: "assistant", content: "" },
+      ]);
       setSending(true);
 
       try {
-        const res = await sendChatMessage(sent, sessionId, topic);
-        setSessionId(res.session_id);
-        setMessages((m) => [...m, { role: "assistant", content: res.reply }]);
+        await streamChatMessage(sent, sessionId, topic, {
+          onSession: (id) => setSessionId(id),
+          onToken: (text) =>
+            setMessages((m) => {
+              const copy = m.slice();
+              const last = copy[copy.length - 1];
+              if (last && last.role === "assistant") {
+                copy[copy.length - 1] = {
+                  ...last,
+                  content: last.content + text,
+                };
+              }
+              return copy;
+            }),
+        });
         return true;
       } catch (e) {
-        // Roll back the optimistic user bubble; caller restores the input.
-        setMessages((m) => m.slice(0, -1));
+        // Roll back the optimistic user + assistant turns; caller restores input.
+        setMessages((m) => m.slice(0, -2));
         setError(
           e instanceof ApiError ? e.message : "Failed to send. Try again.",
         );

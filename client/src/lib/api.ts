@@ -76,6 +76,54 @@ export function sendChatMessage(
   });
 }
 
+/** Stream a chat reply token-by-token. Calls onToken for each chunk and
+ *  onSession once with the server's session id (read from a response header). */
+export async function streamChatMessage(
+  message: string,
+  sessionId: string | null,
+  topic: string,
+  handlers: { onToken: (text: string) => void; onSession?: (id: string) => void },
+): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}/api/chat/stream`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, session_id: sessionId, topic }),
+    });
+  } catch {
+    throw new ApiError(
+      0,
+      "Can't reach the server. Make sure the backend is running on " +
+        BASE_URL +
+        ".",
+    );
+  }
+
+  if (!res.ok || !res.body) {
+    let detail = res.statusText || "Request failed";
+    try {
+      const body = await res.json();
+      if (body?.detail) detail = body.detail;
+    } catch {
+      /* non-JSON error body */
+    }
+    throw new ApiError(res.status, detail);
+  }
+
+  const sessionFromServer = res.headers.get("X-Session-Id");
+  if (sessionFromServer && handlers.onSession) handlers.onSession(sessionFromServer);
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const text = decoder.decode(value, { stream: true });
+    if (text) handlers.onToken(text);
+  }
+}
+
 export function resetChat(sessionId: string): Promise<void> {
   return fetch(`${BASE_URL}/api/chat/${sessionId}`, { method: "DELETE" }).then(
     () => undefined,
