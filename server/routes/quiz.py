@@ -1,5 +1,7 @@
 """Quiz route: GET /api/quiz — generates multiple-choice questions."""
 
+import random
+
 from fastapi import APIRouter, HTTPException, Query
 
 from config import DEFAULT_TOPIC
@@ -26,6 +28,27 @@ def _to_quiz_question(index: int, item: object) -> QuizQuestion:
     )
 
 
+def _balance_answer_positions(questions: list[QuizQuestion]) -> list[QuizQuestion]:
+    """Spread correct answers evenly across option slots, then shuffle that
+    assignment — so the answer key looks balanced (never all "B") yet stays
+    unpredictable. Models have a strong positional bias the prompt can't fix.
+    """
+    num_options = 4
+    targets = [i % num_options for i in range(len(questions))]
+    random.shuffle(targets)
+
+    balanced: list[QuizQuestion] = []
+    for question, target in zip(questions, targets):
+        slot = min(target, len(question.options) - 1)
+        options = list(question.options)
+        current = question.correct_index
+        options[current], options[slot] = options[slot], options[current]
+        balanced.append(
+            question.model_copy(update={"options": options, "correct_index": slot}),
+        )
+    return balanced
+
+
 @router.get("/quiz", response_model=QuizResponse)
 def quiz(
     topic: str = Query(DEFAULT_TOPIC),
@@ -43,4 +66,4 @@ def quiz(
     if not questions:
         raise HTTPException(status_code=502, detail="No questions were generated.")
 
-    return QuizResponse(topic=topic, questions=questions)
+    return QuizResponse(topic=topic, questions=_balance_answer_positions(questions))
