@@ -52,7 +52,9 @@ export function ChatComposer({
         rows={1}
         autoFocus={autoFocus}
         placeholder={placeholder}
-        className="max-h-32 flex-1 resize-none rounded-xl border bg-background px-4 py-2.5 text-sm outline-none placeholder:text-muted focus:border-primary"
+        // 16px on mobile (text-base) stops iOS Safari from auto-zooming the
+        // page on focus; back to text-sm at the sm breakpoint and up.
+        className="max-h-32 flex-1 resize-none rounded-xl border bg-background px-4 py-2.5 text-base outline-none placeholder:text-muted focus:border-primary sm:text-sm"
       />
       <Button type="submit" disabled={!input.trim() || sending}>
         Send

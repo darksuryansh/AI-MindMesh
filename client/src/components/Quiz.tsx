@@ -170,7 +170,7 @@ export function Quiz({ topic }: { topic: string }) {
           </p>
         </div>
         {submitted && (
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span className="font-display text-2xl font-semibold">
               {score}
               <span className="text-muted">/{questions.length}</span>
@@ -213,7 +213,7 @@ export function Quiz({ topic }: { topic: string }) {
                       aria-pressed={isSelected}
                       onClick={() => select(q.id, oi)}
                       className={cn(
-                        "flex items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm transition-colors",
+                        "flex items-start gap-3 rounded-xl border px-4 py-3 text-left text-sm transition-colors",
                         !submitted &&
                           (isSelected
                             ? "border-primary bg-primary/5"

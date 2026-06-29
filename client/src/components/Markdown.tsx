@@ -71,6 +71,21 @@ export function Markdown({
               {children}
             </code>
           ),
+          // Wrap tables so a wide one scrolls inside the card instead of
+          // forcing the whole page to scroll sideways on mobile.
+          table: ({ children }) => (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-sm">{children}</table>
+            </div>
+          ),
+          th: ({ children }) => (
+            <th className="border px-3 py-2 text-left font-semibold">
+              {children}
+            </th>
+          ),
+          td: ({ children }) => (
+            <td className="border px-3 py-2 align-top">{children}</td>
+          ),
         }}
       >
         {content}
