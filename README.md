@@ -12,9 +12,9 @@ on both mobile and desktop.
 
 | | |
 | --- | --- |
-| **Live app** | _<add your Vercel URL>_ |
+| **Live app** | https://ai-mindmesh.vercel.app |
 | **Backend API** | https://darksuryansh-mindmesh.hf.space ( `/health` · `/docs` ) |
-| **Repo** | _<add your GitHub URL>_ |
+| **Repo** | https://github.com/darksuryansh/AI-MindMesh |
 
 ---
 
@@ -131,7 +131,6 @@ streamed back → `conversation_service.py` (persisted after success).
 | `GET` | `/api/explain?level=eli5\|pro&topic=…` | Explanation at the chosen depth |
 | `GET` | `/api/quiz?topic=…` | 5 MCQs with answers + explanations |
 | `POST` | `/api/chat` | Send a message, get reply + full history |
-| `POST` | `/api/chat/stream` | Same, streamed token-by-token |
 | `DELETE` | `/api/chat/{session_id}` | Clear a conversation |
 
 ---
@@ -500,8 +499,6 @@ The assignment asked for **any one** bonus. All four are implemented:
   ([`lib/export.ts`](client/src/lib/export.ts)).
 - ✅ **Second topic** — "How Large Language Models Work", selectable from a dropdown; the
   backend serves it with the generic topic-aware prompts ([`lib/topics.ts`](client/src/lib/topics.ts)).
-- ✅ **Streaming responses** — chat streams token-by-token via `POST /api/chat/stream`, with a
-  small client-side reveal animation so output stays smooth even when Gemini sends large chunks.
 
 ---
 
