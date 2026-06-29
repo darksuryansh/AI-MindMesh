@@ -1,0 +1,11 @@
+# Never ship secrets or local cruft into the image / Space.
+.env
+.env.*
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.git/
+.gitignore
+.dockerignore
+Procfile

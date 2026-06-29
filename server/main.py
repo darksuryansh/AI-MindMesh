@@ -52,6 +52,16 @@ async def handle_gemini_error(request: Request, exc: genai_errors.APIError) -> J
     return JSONResponse(status_code=status, content={"detail": detail})
 
 
+@app.get("/", tags=["meta"])
+def root() -> dict:
+    """Landing route (shown on the Hugging Face Space 'App' tab)."""
+    return {
+        "service": "AI MindMesh API",
+        "docs": "/docs",
+        "health": "/health",
+    }
+
+
 @app.get("/health", tags=["meta"])
 def health() -> dict:
     """Liveness probe. Reports whether a Gemini key is configured (never the key)."""
