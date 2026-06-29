@@ -1,7 +1,21 @@
+---
+title: MindMesh API
+emoji: 🧠
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+short_description: FastAPI + Gemini backend for AI MindMesh
+---
+
 # AI MindMesh — Backend (FastAPI)
 
 FastAPI service that powers the three AI features. Holds the Gemini API key
 server-side; the frontend never talks to Gemini directly.
+
+Deployed on Hugging Face Spaces via the Docker SDK (see `Dockerfile`). Set
+`GEMINI_API_KEY` and `CORS_ORIGINS` in the Space's **Settings → Secrets**.
 
 ## Structure
 
